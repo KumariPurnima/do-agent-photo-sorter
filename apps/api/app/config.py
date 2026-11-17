@@ -23,6 +23,10 @@ class Settings(BaseSettings):
     doctl_bin: str = "doctl"
     demo_mode: bool = True
 
+    # When app_password is set, HTTP Basic Auth protects the site (except /api/health).
+    app_username: str = "admin"
+    app_password: str = ""
+
 
 @lru_cache
 def get_settings() -> Settings:

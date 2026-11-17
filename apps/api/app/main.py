@@ -8,6 +8,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
+from .auth import BasicAuthMiddleware
 from .config import get_settings
 from .harness import create_job, get_job, job_status_payload, list_jobs, refresh_job
 from .spaces import create_album_id, list_sorted, presign_get, presign_upload
@@ -16,6 +17,7 @@ ROOT = Path(__file__).resolve().parents[3]
 WEB_DIST = ROOT / "apps" / "web"
 
 app = FastAPI(title="Agent Photo Sorter", version="0.1.0")
+app.add_middleware(BasicAuthMiddleware)
 
 
 class AlbumCreate(BaseModel):

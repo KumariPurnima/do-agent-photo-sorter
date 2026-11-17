@@ -22,6 +22,12 @@ services:
       - key: APP_NAME
         value: Agent Photo Sorter
         scope: RUN_TIME
+      - key: APP_USERNAME
+        value: admin
+        scope: RUN_TIME
+      - key: APP_PASSWORD
+        scope: RUN_TIME
+        type: SECRET
       - key: HARNESS_INFERENCE_MODEL
         value: anthropic-claude-5-sonnet
         scope: RUN_TIME

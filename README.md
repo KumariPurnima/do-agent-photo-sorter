@@ -73,6 +73,10 @@ infra/app-spec.yaml    App Platform blueprint
 categories.json        Editable folder taxonomy
 ```
 
+## Password protection
+
+Set `APP_USERNAME` / `APP_PASSWORD` to enable HTTP Basic Auth on the site. `/api/health` stays open for App Platform health checks. Locally, leave `APP_PASSWORD` empty to skip the login prompt.
+
 ## Live mode checklist
 
 1. Create a private Spaces bucket and Spaces access keys.
