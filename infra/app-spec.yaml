@@ -4,7 +4,7 @@ services:
   - name: api
     environment_slug: python
     github:
-      repo: YOUR_ORG/do-agent-photo-sorter
+      repo: KumariPurnima/do-agent-photo-sorter
       branch: main
       deploy_on_push: true
     source_dir: /
