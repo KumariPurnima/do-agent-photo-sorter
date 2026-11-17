@@ -2,7 +2,13 @@
 
 **Built with DigitalOcean AI** — a cloud agent that turns a messy trip album into labeled folders.
 
+![Photos sorting into labeled folders](docs/preview.gif)
+
+<sub>Demo animation with placeholder images (not real photos).</sub>
+
 Upload photos, launch a [Harness Runtime](https://docs.digitalocean.com/products/managed-agents/agent-harness-runtime/) session, and let the agent scan, find duplicates, classify with [Serverless Inference](https://docs.digitalocean.com/products/inference/) vision models, and write sorted copies to [Spaces](https://docs.digitalocean.com/products/spaces/). Pause mid-sort, resume from another device, and approve sensitive actions through [Action Gateway](https://docs.digitalocean.com/products/managed-agents/action-gateway/).
+
+**Live app:** [agent-photo-sorter-s27qk.ondigitalocean.app](https://agent-photo-sorter-s27qk.ondigitalocean.app) (password protected)
 
 ## Product map
 
