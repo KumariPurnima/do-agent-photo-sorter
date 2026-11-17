@@ -11,20 +11,33 @@ services:
     http_port: 8080
     instance_count: 1
     instance_size_slug: basic-xxs
+    build_command: pip install -r requirements.txt
     run_command: uvicorn apps.api.app.main:app --host 0.0.0.0 --port 8080
+    health_check:
+      http_path: /api/health
     envs:
       - key: DEMO_MODE
-        value: "false"
+        value: "true"
         scope: RUN_TIME
+      - key: APP_NAME
+        value: Agent Photo Sorter
+        scope: RUN_TIME
+      - key: HARNESS_INFERENCE_MODEL
+        value: anthropic-claude-5-sonnet
+        scope: RUN_TIME
+      - key: SPACES_REGION
+        value: nyc3
+        scope: RUN_TIME
+      - key: SPACES_ENDPOINT
+        value: https://nyc3.digitaloceanspaces.com
+        scope: RUN_TIME
+      # Set these in the Control Panel (or doctl apps update) to enable live Harness + Spaces.
       - key: DIGITALOCEAN_TOKEN
         scope: RUN_TIME
         type: SECRET
       - key: HARNESS_INFERENCE_API_KEY
         scope: RUN_TIME
         type: SECRET
-      - key: HARNESS_INFERENCE_MODEL
-        value: anthropic-claude-5-sonnet
-        scope: RUN_TIME
       - key: SPACES_KEY
         scope: RUN_TIME
         type: SECRET
@@ -34,9 +47,3 @@ services:
       - key: SPACES_BUCKET
         scope: RUN_TIME
         type: SECRET
-      - key: SPACES_REGION
-        value: nyc3
-        scope: RUN_TIME
-      - key: SPACES_ENDPOINT
-        value: https://nyc3.digitaloceanspaces.com
-        scope: RUN_TIME
