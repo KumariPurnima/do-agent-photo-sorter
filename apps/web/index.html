@@ -13,45 +13,91 @@
     <link rel="stylesheet" href="/static/styles.css" />
   </head>
   <body>
-    <div class="aurora" aria-hidden="true"></div>
     <header class="top">
       <div class="brand-lockup">
         <span class="mark" aria-hidden="true"></span>
         <span class="brand">Agent Photo Sorter</span>
       </div>
-      <p class="powered">Built on DigitalOcean Managed Agents</p>
+      <div class="top-actions">
+        <p class="powered">DigitalOcean Managed Agents</p>
+        <button class="icon-btn" id="themeToggle" type="button" aria-label="Toggle theme">☾</button>
+      </div>
     </header>
 
-    <main>
-      <section class="hero" id="hero">
+    <section class="hero-stage" id="hero">
+      <div class="hero-media" aria-hidden="true">
+        <img
+          id="heroGif"
+          src="/static/assets/preview.gif"
+          alt=""
+          width="740"
+          height="442"
+        />
+        <div class="hero-shade"></div>
+      </div>
+      <div class="hero-copy">
         <p class="eyebrow">Harness Runtime · Inference · Spaces</p>
         <h1>Agent Photo Sorter</h1>
         <p class="lede">
-          Drop a trip album in. A cloud agent scans, dedupes, and files every shot into
-          labeled folders—pause and resume anytime.
+          Point a cloud agent at your trip album and watch every photo fly into its own folder.
         </p>
         <div class="cta-row">
           <label class="btn primary">
-            Choose photos
+            Choose folder
             <input id="fileInput" type="file" accept="image/*,video/*" multiple hidden />
           </label>
           <button class="btn ghost" id="startSort" type="button" disabled>Start sorting</button>
+          <button class="btn ghost" id="replayDemo" type="button">Replay demo</button>
         </div>
         <p class="hint" id="selectionHint">No files selected yet.</p>
+      </div>
+    </section>
+
+    <main>
+      <section class="features" aria-label="What it does">
+        <article>
+          <h2>Sorts photos &amp; videos</h2>
+          <p>Selfies, people, food, travel, screenshots, clips — or your own folders.</p>
+        </article>
+        <article>
+          <h2>Finds duplicates</h2>
+          <p>Exact copies and near-dupes land in <code>_Review</code> with a keep list.</p>
+        </article>
+        <article>
+          <h2>Keeps originals</h2>
+          <p>Reads only; writes sorted copies to Spaces (or a local outbox).</p>
+        </article>
       </section>
 
-      <section class="panel" id="statusPanel" hidden>
+      <section class="panel" id="categoriesPanel">
         <div class="panel-head">
-          <h2>Sort session</h2>
+          <h2>Folders</h2>
+          <span class="muted">Editable taxonomy from categories.json</span>
+        </div>
+        <div class="chip-row" id="categoryChips"></div>
+      </section>
+
+      <section class="panel sort-stage" id="statusPanel" hidden>
+        <div class="panel-head">
+          <h2>Sorting</h2>
           <span class="pill" id="jobStatus">idle</span>
         </div>
-        <p class="mono" id="jobMeta"></p>
-        <pre class="log" id="jobLog"></pre>
+        <div class="sort-layout">
+          <div class="sort-visual">
+            <img id="sortGif" src="/static/assets/preview.gif" alt="Photos sorting into folders" />
+            <p class="caption">Live demo animation while the Harness session runs.</p>
+          </div>
+          <div class="sort-side">
+            <p class="mono" id="jobMeta"></p>
+            <div class="thumb-strip" id="thumbStrip" hidden></div>
+            <pre class="log" id="jobLog"></pre>
+          </div>
+        </div>
       </section>
 
       <section class="panel" id="foldersPanel" hidden>
         <div class="panel-head">
-          <h2>Sorted folders</h2>
+          <h2>Sorted results</h2>
           <span class="muted" id="folderCount"></span>
         </div>
         <div class="folder-grid" id="folderGrid"></div>
@@ -59,9 +105,7 @@
     </main>
 
     <footer>
-      <p>
-        Powered by DigitalOcean Harness Runtime, Serverless Inference, and Spaces.
-      </p>
+      <p>Built with DigitalOcean Harness Runtime, Serverless Inference, Action Gateway, and Spaces.</p>
     </footer>
     <script src="/static/app.js" type="module"></script>
   </body>

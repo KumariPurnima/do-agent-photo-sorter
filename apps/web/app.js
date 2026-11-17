@@ -1,5 +1,6 @@
 const fileInput = document.getElementById("fileInput");
 const startSort = document.getElementById("startSort");
+const replayDemo = document.getElementById("replayDemo");
 const selectionHint = document.getElementById("selectionHint");
 const statusPanel = document.getElementById("statusPanel");
 const foldersPanel = document.getElementById("foldersPanel");
@@ -8,23 +9,51 @@ const jobMeta = document.getElementById("jobMeta");
 const jobLog = document.getElementById("jobLog");
 const folderGrid = document.getElementById("folderGrid");
 const folderCount = document.getElementById("folderCount");
+const categoryChips = document.getElementById("categoryChips");
+const thumbStrip = document.getElementById("thumbStrip");
+const heroGif = document.getElementById("heroGif");
+const sortGif = document.getElementById("sortGif");
+const themeToggle = document.getElementById("themeToggle");
+
+const PREVIEW_SRC = "/static/assets/preview.gif";
 
 let selectedFiles = [];
 let albumId = null;
+let objectUrls = [];
+
+themeToggle.addEventListener("click", () => {
+  const next = document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light";
+  if (next === "dark") document.documentElement.removeAttribute("data-theme");
+  else document.documentElement.setAttribute("data-theme", "light");
+  themeToggle.textContent = next === "light" ? "☀" : "☾";
+});
+
+replayDemo.addEventListener("click", () => {
+  restartGif(heroGif);
+  statusPanel.hidden = false;
+  restartGif(sortGif);
+  statusPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+  appendLog("Replaying sort animation (placeholder demo images).");
+});
 
 fileInput.addEventListener("change", () => {
+  clearObjectUrls();
   selectedFiles = [...fileInput.files];
   startSort.disabled = selectedFiles.length === 0;
   selectionHint.textContent =
     selectedFiles.length === 0
       ? "No files selected yet."
       : `${selectedFiles.length} file${selectedFiles.length === 1 ? "" : "s"} ready.`;
+  renderThumbs(selectedFiles.slice(0, 24));
 });
 
 startSort.addEventListener("click", async () => {
   startSort.disabled = true;
   statusPanel.hidden = false;
+  foldersPanel.hidden = true;
+  restartGif(sortGif);
   setStatus("uploading", "Preparing album…");
+  statusPanel.scrollIntoView({ behavior: "smooth", block: "start" });
 
   try {
     const albumRes = await api("/api/albums", {
@@ -84,11 +113,41 @@ startSort.addEventListener("click", async () => {
   }
 });
 
+function renderThumbs(files) {
+  if (!files.length) {
+    thumbStrip.hidden = true;
+    thumbStrip.innerHTML = "";
+    return;
+  }
+  thumbStrip.hidden = false;
+  thumbStrip.innerHTML = "";
+  files.forEach((file, i) => {
+    if (!file.type.startsWith("image/")) return;
+    const url = URL.createObjectURL(file);
+    objectUrls.push(url);
+    const img = document.createElement("img");
+    img.src = url;
+    img.alt = file.name;
+    img.style.animationDelay = `${i * 40}ms`;
+    thumbStrip.appendChild(img);
+  });
+}
+
+function clearObjectUrls() {
+  objectUrls.forEach((u) => URL.revokeObjectURL(u));
+  objectUrls = [];
+}
+
+function restartGif(img) {
+  if (!img) return;
+  img.src = `${PREVIEW_SRC}?t=${Date.now()}`;
+}
+
 async function pollJob(jobId) {
   let last = null;
   for (let i = 0; i < 40; i += 1) {
     last = await api(`/api/jobs/${jobId}/refresh`, { method: "POST", body: "{}" });
-    setStatus(last.status, last.message);
+    setStatus(last.status, last.message || "");
     if (last.session_id) {
       jobMeta.textContent = `job=${last.id} session=${last.session_name} id=${last.session_id}`;
     }
@@ -116,24 +175,73 @@ async function loadFolders(id) {
   const entries = Object.entries(data.folders || {});
   folderCount.textContent = `${data.count} objects`;
   if (entries.length === 0) {
-    folderGrid.innerHTML = `<div class="folder-card"><h3>Waiting for sync</h3><p>When the agent finishes and syncs to Spaces, folders appear here. Locally, run <code>scripts/run_pipeline.py</code> against an inbox.</p></div>`;
+    // In demo mode, synthesize folders from selected file names for a richer UI.
+    if (selectedFiles.length) {
+      const demo = demoFoldersFromFiles(selectedFiles);
+      folderCount.textContent = `${selectedFiles.length} demo placements`;
+      folderGrid.innerHTML = Object.entries(demo)
+        .map(([name, items]) => folderCard(name, items))
+        .join("");
+      appendLog("Demo folders rendered from selected filenames (no Spaces sync).");
+      return;
+    }
+    folderGrid.innerHTML = `<div class="folder-card"><h3>Waiting for sync</h3><p>When the agent finishes and syncs to Spaces, folders appear here.</p></div>`;
     return;
   }
   folderGrid.innerHTML = entries
-    .map(
-      ([name, items]) =>
-        `<article class="folder-card"><h3>${escapeHtml(name)}</h3><p>${items.length} file${items.length === 1 ? "" : "s"}</p></article>`
-    )
+    .map(([name, items]) => {
+      const thumbs = items
+        .filter((i) => i.url)
+        .slice(0, 4)
+        .map((i) => `<img src="${escapeHtml(i.url)}" alt="" />`)
+        .join("");
+      return `<article class="folder-card"><h3>${escapeHtml(name)}</h3><p>${items.length} file${items.length === 1 ? "" : "s"}</p>${thumbs ? `<div class="folder-thumbs">${thumbs}</div>` : ""}</article>`;
+    })
     .join("");
+}
+
+function folderCard(name, items) {
+  const thumbs = items
+    .slice(0, 4)
+    .map((src) => `<img src="${src}" alt="" />`)
+    .join("");
+  return `<article class="folder-card"><h3>${escapeHtml(name)}</h3><p>${items.length} file${items.length === 1 ? "" : "s"}</p><div class="folder-thumbs">${thumbs}</div></article>`;
+}
+
+function demoFoldersFromFiles(files) {
+  const buckets = {
+    Selfies: [],
+    "Food & drinks": [],
+    "Travel & nature": [],
+    Screenshots: [],
+    "People & family": [],
+    Other: [],
+  };
+  for (const file of files) {
+    const n = file.name.toLowerCase();
+    let folder = "Other";
+    if (n.includes("selfie")) folder = "Selfies";
+    else if (n.includes("food") || n.includes("dinner") || n.includes("coffee")) folder = "Food & drinks";
+    else if (n.includes("screen")) folder = "Screenshots";
+    else if (n.includes("beach") || n.includes("travel") || n.includes("sunset") || n.includes("mountain"))
+      folder = "Travel & nature";
+    else if (n.includes("family") || n.includes("people") || n.includes("group")) folder = "People & family";
+    const url = file.type.startsWith("image/") ? URL.createObjectURL(file) : "";
+    if (url) objectUrls.push(url);
+    if (url) buckets[folder].push(url);
+    else buckets[folder].push("");
+  }
+  return Object.fromEntries(Object.entries(buckets).filter(([, v]) => v.length));
 }
 
 function setStatus(status, message) {
   jobStatus.textContent = status;
-  jobStatus.classList.toggle("warn", status === "error" || status === "queued");
+  jobStatus.classList.toggle("warn", status === "error" || status === "queued" || status === "uploading");
   if (message) appendLog(message);
 }
 
 function appendLog(text) {
+  if (!text) return;
   const stamp = new Date().toLocaleTimeString();
   jobLog.textContent += `[${stamp}] ${text}\n`;
   jobLog.scrollTop = jobLog.scrollHeight;
@@ -161,7 +269,18 @@ function escapeHtml(s) {
     .replaceAll('"', "&quot;");
 }
 
-// Boot health
+async function loadCategories() {
+  try {
+    const data = await api("/api/categories");
+    const folders = data.folders || [];
+    categoryChips.innerHTML = folders
+      .map((f) => `<span class="chip" title="${escapeHtml(f.description || "")}">${escapeHtml(f.name)}</span>`)
+      .join("");
+  } catch {
+    categoryChips.innerHTML = `<span class="chip">Selfies</span><span class="chip">Food & drinks</span><span class="chip">Travel & nature</span>`;
+  }
+}
+
 api("/api/health")
   .then((h) => {
     appendLog(
@@ -171,3 +290,5 @@ api("/api/health")
     );
   })
   .catch(() => appendLog("API health check failed"));
+
+loadCategories();
