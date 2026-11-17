@@ -1,0 +1,13 @@
+{
+  "name": "photo-sorter",
+  "description": "Minimal Action Gateway Toolbelt for Agent Photo Sorter sessions. Prefer publishing this and referencing toolbelt:photo-sorter@v1 from the harness spec.",
+  "tools": [
+    "exa_web_search",
+    "exa_web_fetch"
+  ],
+  "notes": [
+    "Photo labeling itself uses Serverless Inference VLMs inside scripts/label.py, not Action Gateway.",
+    "Search/fetch are optional helpers when the agent needs place or landmark context.",
+    "Create with: python scripts/create_toolbelt.py (requires DIGITALOCEAN_TOKEN and pydo)."
+  ]
+}

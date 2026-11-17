@@ -1,0 +1,42 @@
+name: agent-photo-sorter
+region: nyc
+services:
+  - name: api
+    environment_slug: python
+    github:
+      repo: YOUR_ORG/do-agent-photo-sorter
+      branch: main
+      deploy_on_push: true
+    source_dir: /
+    http_port: 8080
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    run_command: uvicorn apps.api.app.main:app --host 0.0.0.0 --port 8080
+    envs:
+      - key: DEMO_MODE
+        value: "false"
+        scope: RUN_TIME
+      - key: DIGITALOCEAN_TOKEN
+        scope: RUN_TIME
+        type: SECRET
+      - key: HARNESS_INFERENCE_API_KEY
+        scope: RUN_TIME
+        type: SECRET
+      - key: HARNESS_INFERENCE_MODEL
+        value: anthropic-claude-5-sonnet
+        scope: RUN_TIME
+      - key: SPACES_KEY
+        scope: RUN_TIME
+        type: SECRET
+      - key: SPACES_SECRET
+        scope: RUN_TIME
+        type: SECRET
+      - key: SPACES_BUCKET
+        scope: RUN_TIME
+        type: SECRET
+      - key: SPACES_REGION
+        value: nyc3
+        scope: RUN_TIME
+      - key: SPACES_ENDPOINT
+        value: https://nyc3.digitaloceanspaces.com
+        scope: RUN_TIME

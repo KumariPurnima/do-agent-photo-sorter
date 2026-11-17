@@ -1,0 +1,75 @@
+# DigitalOcean Harness Runtime environment for Agent Photo Sorter.
+# Scripted create (no TTY):
+#   doctl harness-runtime create --spec harness/photo-sorter.yaml \
+#     --prompt "$(cat harness/prompts/sort-album.md)" \
+#     --on-hitl approve --interactive=false
+# Interactive attach later:
+#   doctl harness-runtime launch <session-name>
+
+name: agent-photo-sorter
+harness: claude-code
+size: mars-4vcpu-8gb
+idle_timeout: 30m
+
+env:
+  # Route the coding agent through DigitalOcean Serverless Inference.
+  # Change to any coding-capable model ID from Available Models.
+  HARNESS_INFERENCE_MODEL: anthropic-claude-5-sonnet
+  PHOTO_SORTER_ROOT: /workspace
+  PHOTO_SORTER_INBOX: /workspace/inbox
+  PHOTO_SORTER_OUTBOX: /workspace/sorted
+  PHOTO_SORTER_WORK: /workspace/work
+  SPACES_ENDPOINT: ${SPACES_ENDPOINT}
+  SPACES_BUCKET: ${SPACES_BUCKET}
+  SPACES_REGION: ${SPACES_REGION}
+  SPACES_PREFIX: ${SPACES_PREFIX}
+
+secrets:
+  HARNESS_INFERENCE_API_KEY: ${HARNESS_INFERENCE_API_KEY}
+  SPACES_KEY: ${SPACES_KEY}
+  SPACES_SECRET: ${SPACES_SECRET}
+
+# Constrained Action Gateway catalog for this product (not full 16k tools).
+# After publishing harness/toolbelt.photo-sorter.json you can switch to:
+#   - do.actions: ["toolbelt:photo-sorter@v1"]
+tools:
+  - do.actions:
+      tools:
+        - exa_web_search
+        - exa_web_fetch
+      preload_tools:
+        - exa_web_search
+
+egress:
+  allow_hosts:
+    - digitaloceanspaces.com
+    - nyc3.digitaloceanspaces.com
+    - sfo3.digitaloceanspaces.com
+    - ams3.digitaloceanspaces.com
+    - sgp1.digitaloceanspaces.com
+    - inference.do-ai.run
+    - api.digitalocean.com
+    - pypi.org
+    - files.pythonhosted.org
+    - github.com
+    - api.github.com
+
+permissions:
+  default: ask
+  rules:
+    - tool: file.read
+      action: allow
+    - tool: file.write
+      action: allow
+    - tool: bash
+      action: allow
+    - tool: bash
+      match: { command: "rm -rf *" }
+      action: deny
+    - tool: bash
+      match: { command: "rm -rf /" }
+      action: deny
+    - tool: do.actions/exa_web_search
+      action: allow
+    - tool: do.actions/exa_web_fetch
+      action: ask

@@ -1,0 +1,42 @@
+{
+  "folders": [
+    {
+      "id": "selfies",
+      "name": "Selfies",
+      "description": "Close-up photos of a person holding the camera or facing it directly, often arm-extended."
+    },
+    {
+      "id": "people",
+      "name": "People & family",
+      "description": "Photos focused on people together, portraits, group shots, and family moments."
+    },
+    {
+      "id": "food",
+      "name": "Food & drinks",
+      "description": "Meals, snacks, drinks, restaurant plating, and cafe shots."
+    },
+    {
+      "id": "travel",
+      "name": "Travel & nature",
+      "description": "Landscapes, beaches, mountains, city skylines, landmarks, and outdoor scenery."
+    },
+    {
+      "id": "screenshots",
+      "name": "Screenshots",
+      "description": "Phone or computer screen captures, UI chrome, notification panels, and chat bubbles."
+    },
+    {
+      "id": "videos",
+      "name": "Travel clips",
+      "description": "Short videos and clips from the trip; place video files here when content is motion."
+    },
+    {
+      "id": "other",
+      "name": "Other",
+      "description": "Anything that does not clearly fit the folders above."
+    }
+  ],
+  "review": {
+    "duplicates": "_Review/duplicates"
+  }
+}
